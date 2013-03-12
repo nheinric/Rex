@@ -541,7 +541,7 @@ sub connect {
    }
    else {
       Rex::Logger::info("Wrong username or password. Or wrong key.", "warn");
-      CORE::exit(1);
+      die;
    }
 
    # need to get rid of this
