@@ -100,6 +100,14 @@ sub init {
    $log_opened = 1;
 }
 
+sub error {
+   info( @_, 'error' );
+}
+
+sub warn {
+   info( @_, 'warn ' );
+}
+
 sub info {
    my ($msg, $type) = @_;
    my $color = 'green';
