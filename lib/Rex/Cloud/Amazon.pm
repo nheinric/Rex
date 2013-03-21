@@ -439,22 +439,35 @@ sub _hash {
 sub _xml {
    my ($self, $xml) = @_;
 
-   my $x = XML::Simple->new;
+   my $x   = XML::Simple->new;
    my $res = $x->XMLin($xml);
-   if(defined $res->{"Errors"}) {
-      if(ref($res->{"Errors"}) ne "ARRAY") {
-         $res->{"Errors"} = [ $res->{"Errors"} ];
-      }
 
-      my @error_msg = ();
-      for my $error (@{$res->{"Errors"}}) {
-         push(@error_msg, $error->{"Error"}->{"Message"} . " (Code: " . $error->{"Error"}->{"Code"} . ")");
-      }
-
-      die(join("\n", @error_msg));
+   my @error_msg;
+   if ( $res->{"Error"} ) {
+      push( @error_msg, &_error_message( $res ) );
    }
+   elsif ( my $ref = $res->{"Errors"} ) {
+      if ( ref($ref) ne "ARRAY" ) {
+         $ref = [ $ref ];
+      }
+
+      for my $error ( @$ref ) {
+        push( @error_msg, &_error_message( $error ) );
+      }
+   }
+   @error_msg and die( join("\n", @error_msg) );
 
    return $res;
+}
+
+sub _error_message {
+    my $error = shift;
+
+    $error->{"Error"}->{"Message"}
+    . " (Code: "
+    . $error->{"Error"}->{"Code"}
+    . ")"
+    ;
 }
 
 
