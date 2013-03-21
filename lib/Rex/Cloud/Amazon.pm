@@ -290,29 +290,32 @@ sub list_running_instances {
    return grep { $_->{"state"} eq "running" } $self->list_instances();
 }
 
-sub list_images {
-   my ( $self, %params ) = ( shift, @_ );
+sub images {
+   my ( $self, %args ) = ( @_ );
 
-   my @ret;
+   $args{'Owner'} ||= 'self';
 
-   $params{'Owner'} ||= 'self';
-
-   my $xml = $self->_request( "DescribeImages", %params );
+   my $xml = $self->_request(
+      "DescribeImages", %args
+   );
    my $ref = $self->_xml($xml);
 
-   return unless($ref);
-   return unless(exists $ref->{"imagesSet"});
+   my $itemref = $ref->{"imagesSet"}->{"item"}
+      or return ();
 
-   my $items;
-   return unless( $items = $ref->{"imagesSet"}->{"item"} );
-
-   # Special case for single-element return
-   # todo Handle in XML parser
-   if ( exists $items->{name} ) {
-      $items = { $items->{name} => $items };
+# todo No easy way to alter XML::Simple parameters, so have to handle single/multiple elements on our own
+   my @items;
+   if ( exists $itemref->{"kernelId"} ) {
+      push @items, $itemref;
+   }
+   else {
+      while ( my ($key,$val) = each %$itemref ) {
+         $val->{name} = $key;
+         push( @items, $val );
+      }
    }
 
-   return $items;
+   return @items;
 }
 
 sub create_image {
