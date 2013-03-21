@@ -398,6 +398,58 @@ sub update_autoscaling_group {
         ))[0];
 }
 
+sub launch_configs {
+    my ( $self, %data ) = ( @_ );
+
+    $self->{__endpoint}  =~ s/ec2\./autoscaling./;
+    $self->{"__version"} = "2011-01-01";
+
+    my $xml = $self->_request(
+        "DescribeLaunchConfigurations", %data
+        );
+    my $ref = $self->_xml($xml);
+
+# todo No easy way to alter XML::Simple parameters, so have to handle single/multiple elements on our own
+    my $itemref = $ref->{"DescribeLaunchConfigurationsResult"}->{"LaunchConfigurations"}->{"member"} or return ();
+    my @items;
+    if ( ref $itemref eq 'HASH' ) {
+        push @items, $itemref;
+    }
+    else {
+        @items = @$itemref;
+    }
+
+   return @items;
+}
+
+sub create_launch_config {
+    my ( $self, %data ) = ( @_ );
+
+    $self->{__endpoint}  =~ s/ec2\./autoscaling./;
+    $self->{"__version"} = "2011-01-01";
+
+    my $xml = $self->_request(
+        "CreateLaunchConfiguration", %data
+        );
+    my $ref = $self->_xml($xml);
+
+    ($self->launch_configs(
+        'LaunchConfigurationNames.member.1' => $data{LaunchConfigurationName}
+        ))[0];
+}
+
+sub delete_launch_config {
+    my ( $self, %data ) = ( @_ );
+
+    $self->{__endpoint}  =~ s/ec2\./autoscaling./;
+    $self->{"__version"} = "2011-01-01";
+
+    my $xml = $self->_request(
+        "DeleteLaunchConfiguration", %data
+        );
+    my $ref = $self->_xml($xml);
+}
+
 sub _request {
    my ($self, $action, %args) = @_;
 

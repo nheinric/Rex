@@ -76,6 +76,8 @@ use Rex::Group::Entry::Server;
                create_cloud_image
 
                cloud_autoscaling_group
+
+               cloud_launch_config
                );
 
 Rex::Config->register_set_handler("cloud" => sub {
@@ -518,6 +520,36 @@ sub cloud_autoscaling_group {
 }
 
 =back
+
+=item cloud_launch_config( $action, \%data )
+
+This function controlls all aspects of a cloud autoscaling launch config.
+
+    get_all
+    create( %args )
+    delete( LaunchConfigurationName => $name )
+
+=cut
+sub cloud_launch_config {
+   my ( $action, $data ) = @_;
+
+   my $cloud = _get_cloud_service;
+
+    if ( $action eq "get_all" ) {
+        $cloud->launch_configs();
+    }
+    elsif ( $action eq 'create' ) {
+        my %data = %$data;
+        $cloud->create_launch_config( %data );
+    }
+    elsif ( $action eq 'delete' ) {
+        my %data = %$data;
+        $cloud->delete_launch_config( %data );
+    }
+    else {
+        die "'cloud_launch_config $action' is unsupported";
+    }
+}
 
 =cut
 
