@@ -358,6 +358,46 @@ sub get_availability_zones {
    return @zones;
 }
 
+sub autoscaling_groups {
+    my ( $self, %data ) = ( @_ );
+
+    $self->{__endpoint}  =~ s/ec2\./autoscaling./;
+    $self->{"__version"} = "2011-01-01";
+
+    my $xml = $self->_request(
+        "DescribeAutoScalingGroups", %data
+        );
+    my $ref = $self->_xml($xml);
+
+# todo No easy way to alter XML::Simple parameters, so have to handle single/multiple elements on our own
+    my $itemref = $ref->{"DescribeAutoScalingGroupsResult"}->{"AutoScalingGroups"}->{"member"} or return ();
+    my @items;
+    if ( ref $itemref eq 'HASH' ) {
+        push @items, $itemref;
+    }
+    else {
+        @items = @$itemref;
+    }
+
+   return @items;
+}
+
+sub update_autoscaling_group {
+    my ( $self, %data ) = ( @_ );
+
+    $self->{__endpoint}  =~ s/ec2\./autoscaling./;
+    $self->{"__version"} = "2011-01-01";
+
+    my $xml = $self->_request(
+        "UpdateAutoScalingGroup", %data
+        );
+    my $ref = $self->_xml($xml);
+
+    ($self->autoscaling_groups(
+        'AutoScalingGroupNames.member.1' => $data{AutoScalingGroupName}
+        ))[0];
+}
+
 sub _request {
    my ($self, $action, %args) = @_;
 

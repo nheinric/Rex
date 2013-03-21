@@ -74,7 +74,9 @@ use Rex::Group::Entry::Server;
 
                get_cloud_images
                create_cloud_image
-            );
+
+               cloud_autoscaling_group
+               );
 
 Rex::Config->register_set_handler("cloud" => sub {
    my ($name, @options) = @_;
@@ -488,8 +490,31 @@ sub create_cloud_image {
    my $cloud = _get_cloud_service;
 
    return $cloud->create_image( @_ );
+}
 
+=item cloud_autoscaling_group( $action, \%data )
 
+This function controlls all aspects of a cloud autoscaling launch config.
+
+    get_all
+    update( %args )
+
+=cut
+sub cloud_autoscaling_group {
+   my ( $action, $data ) = @_;
+
+   my $cloud = _get_cloud_service;
+
+    if ( $action eq "get_all" ) {
+        $cloud->autoscaling_groups();
+    }
+    elsif ( $action eq 'update' ) {
+        my %data = %$data;
+        $cloud->update_autoscaling_group( %data );
+    }
+    else {
+        die "'cloud_autoscaling_group $action' is unsupported";
+    }
 }
 
 =back
