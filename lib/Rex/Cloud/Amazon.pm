@@ -82,20 +82,23 @@ sub run_instance {
                SecurityGroup => $data{"security_group"} || "default",
                "Placement.AvailabilityZone" => $data{"zone"} || "");
 
-   my $ref = $self->_xml($xml);
+   my $ref         = $self->_xml($xml);
+   my $instance_id = $ref->{"instancesSet"}->{"item"}->{"instanceId"};
 
    if(exists $data{"name"}) {
-      $self->add_tag(id => $ref->{"instancesSet"}->{"item"}->{"instanceId"},
+      $self->add_tag(id => $instance_id,
                      name => "Name",
                      value => $data{"name"});
    }
 
-   my ($info) = grep { $_->{"id"} eq $ref->{"instancesSet"}->{"item"}->{"instanceId"} } $self->list_instances();
+   my ($info) = grep { $_->{"id"} eq $instance_id } $self->list_instances();
 
+   my $sleep = 1;
    while($info->{"state"} ne "running") {
       Rex::Logger::debug("Waiting for instance to be created...");
-      ($info) = grep { $_->{"id"} eq $ref->{"instancesSet"}->{"item"}->{"instanceId"} } $self->list_instances();
-      sleep 1;
+      ($info) = ($self->list_instances( 'InstanceId.1' => $instance_id ))[0];
+      sleep( $sleep *= 2 );
+      $sleep > 8 and $sleep = 1;
    }
 
    if(exists $data{"volume"}) {
@@ -247,11 +250,11 @@ sub list_volumes {
 }
 
 sub list_instances {
-   my ($self) = @_;
+   my ( $self, %params ) = ( shift, @_ );
 
    my @ret;
 
-   my $xml = $self->_request("DescribeInstances");
+   my $xml = $self->_request("DescribeInstances", %params);
    my $ref = $self->_xml($xml);
 
    return unless($ref);

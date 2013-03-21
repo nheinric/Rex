@@ -166,7 +166,7 @@ sub cloud_instance_list {
    $cloud->set_auth(@cloud_auth);
    $cloud->set_endpoint($cloud_region);
 
-   return $cloud->list_instances();
+   return $cloud->list_instances( @_ );
 
 }
 
