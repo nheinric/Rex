@@ -40,6 +40,8 @@ sub start_instance { Rex::Logger::debug("Not implemented"); }
 sub stop_instance { Rex::Logger::debug("Not implemented"); }
 sub list_instances { Rex::Logger::debug("Not implemented"); }
 sub list_running_instances { Rex::Logger::debug("Not implemented"); }
+sub list_images { Rex::Logger::debug("Not implemented"); }
+sub create_image { Rex::Logger::debug("Not implemented"); }
 
 sub create_volume { Rex::Logger::debug("Not implemented"); }
 sub attach_volume { Rex::Logger::debug("Not implemented"); }
@@ -48,7 +50,7 @@ sub delete_volume { Rex::Logger::debug("Not implemented"); }
 sub list_volumes { Rex::Logger::debug("Not implemented"); }
 
 sub add_tag { Rex::Logger::debug("Not implemented"); }
-   
+
 sub get_regions { Rex::Logger::debug("Not implemented"); }
 sub get_availability_zones { Rex::Logger::debug("Not implemented"); }
 

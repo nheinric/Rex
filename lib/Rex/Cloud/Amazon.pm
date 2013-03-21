@@ -290,6 +290,44 @@ sub list_running_instances {
    return grep { $_->{"state"} eq "running" } $self->list_instances();
 }
 
+sub list_images {
+   my ( $self, %params ) = ( shift, @_ );
+
+   my @ret;
+
+   $params{'Owner'} ||= 'self';
+
+   my $xml = $self->_request( "DescribeImages", %params );
+   my $ref = $self->_xml($xml);
+
+   return unless($ref);
+   return unless(exists $ref->{"imagesSet"});
+
+   my $items;
+   return unless( $items = $ref->{"imagesSet"}->{"item"} );
+
+   # Special case for single-element return
+   # todo Handle in XML parser
+   if ( exists $items->{name} ) {
+      $items = { $items->{name} => $items };
+   }
+
+   return $items;
+}
+
+sub create_image {
+   my ( $self, %params ) = ( shift, @_ );
+
+   my @ret;
+
+   my $xml = $self->_request( "CreateImage", %params );
+   my $ref = $self->_xml($xml);
+
+   return unless($ref);
+
+   return $ref;
+}
+
 sub get_regions {
    my ($self) = @_;
 

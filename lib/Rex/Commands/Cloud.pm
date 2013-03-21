@@ -69,7 +69,10 @@ use Rex::Group::Entry::Server;
                cloud_service cloud_auth cloud_region 
                get_cloud_instances_as_group get_cloud_regions get_cloud_availability_zones
                get_cloud_plans
-               get_cloud_operating_systems);
+               get_cloud_images
+               get_cloud_operating_systems
+               create_cloud_image
+            );
 
 Rex::Config->register_set_handler("cloud" => sub {
    my ($name, @options) = @_;
@@ -452,6 +455,44 @@ sub get_cloud_operating_systems {
    $cloud->set_endpoint($cloud_region);
 
    return $cloud->list_operating_systems;
+}
+
+=item get_cloud_images( [filter => val[, filter2 => val2...]] )
+
+Returns a reference to a hash of available images, keyed on image name.
+
+Defaults to returning only those images owned by you.
+
+Example:
+
+   # Same response
+   my $images = get_cloud_images( 'Owner' => 'self' );
+   my $images = get_cloud_images();
+
+=cut
+sub get_cloud_images {
+
+   my $cloud = get_cloud_service($cloud_service);
+
+   $cloud->set_auth(@cloud_auth);
+   $cloud->set_endpoint($cloud_region);
+
+   return $cloud->list_images( @_ );
+}
+
+=item create_cloud_image( $instance_id )
+
+Take a snapshot (image) based on the given C<instance>.
+
+=cut
+sub create_cloud_image {
+
+   my $cloud = get_cloud_service($cloud_service);
+
+   $cloud->set_auth(@cloud_auth);
+   $cloud->set_endpoint($cloud_region);
+
+   return $cloud->create_image( @_ );
 }
 
 =back
